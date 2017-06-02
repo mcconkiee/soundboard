@@ -5,6 +5,7 @@ package com.example.ericmcconkie.careerday;
  */
 
 public class Animal {
+    public int animalId;
     public int soundId;
     public int imageId;
 

@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,6 +53,101 @@ public class AddNewActivity extends AppCompatActivity {
         if (!permissionToRecordAccepted ) finish();
 
     }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_new);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        imageView = (ImageView)findViewById(R.id.imageView);
+
+        //camera
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+        });
+
+
+        //dictation
+        // Record to the external cache directory for visibility
+        Long tsLong = System.currentTimeMillis()/1000;
+        timestamp = tsLong.toString();
+        String abs = getExternalCacheDir().getAbsolutePath() + "/";
+        if(getExternalMediaDirs().length > 0){
+            abs = getExternalMediaDirs()[0].getAbsolutePath() + "/";
+        }
+        mFileName = abs + timestamp + "_sound.3gp";
+
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        FloatingActionButton fabspeak = (FloatingActionButton) findViewById(R.id.fab_speak);
+        fabspeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStartRecording = !mStartRecording;
+                if(mStartRecording){
+                    startRecording();
+                }else{
+                    stopRecording();
+                    startPlaying();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(photo);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_save) {
+            if(mFileName == null){
+                Toast.makeText(this,"Please add a voice sample",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            Bitmap bm=((BitmapDrawable)imageView.getDrawable()).getBitmap();
+            String path = saveToInternalStorage(bm);
+            if(path != null){
+                //save and finsih
+                //add data to the activity that called this..
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("image",path);
+                resultIntent.putExtra("sound",mFileName);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    //AUDIO PRIVATE METHODS
     private void onRecord(boolean start) {
         if (start) {
             startRecording();
@@ -106,74 +202,17 @@ public class AddNewActivity extends AppCompatActivity {
         mRecorder = null;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_new);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        imageView = (ImageView)findViewById(R.id.imageView);
-
-        //camera
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            }
-        });
-
-
-        //dictation
-        // Record to the external cache directory for visibility
-        Long tsLong = System.currentTimeMillis()/1000;
-        timestamp = tsLong.toString();
-        mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/"+ timestamp + "_sound.3gp";
-
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
-        FloatingActionButton fabspeak = (FloatingActionButton) findViewById(R.id.fab_speak);
-        fabspeak.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mStartRecording = !mStartRecording;
-                if(mStartRecording){
-                    startRecording();
-                }else{
-                    stopRecording();
-                    startPlaying();
-                }
-            }
-        });
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(photo);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-
-
+    //Save image to disk
     private String saveToInternalStorage(Bitmap bitmapImage){
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
+        String abs = getExternalCacheDir().getAbsolutePath() + "/";
+        if(getExternalMediaDirs().length > 0){
+            abs = getExternalMediaDirs()[0].getAbsolutePath() + "/";
+        }
+
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File mypath=new File(directory,timestamp + "_image.jpg");
+        File mypath=new File(abs,timestamp + "_image.jpg");
 
         FileOutputStream fos = null;
         try {
@@ -187,32 +226,9 @@ public class AddNewActivity extends AppCompatActivity {
                 fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }/**/
         }
         return mypath.getPath();
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_save) {
-            Bitmap bm=((BitmapDrawable)imageView.getDrawable()).getBitmap();
-            String path = saveToInternalStorage(bm);
-            if(path != null){
-                //save and finsih
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("image",path);
-                resultIntent.putExtra("sound",mFileName);
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
-            }
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

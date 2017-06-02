@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.example.ericmcconkie.careerday.db.SQLiteDBHelper;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -45,18 +47,24 @@ public class SoundBoardActivity extends AppCompatActivity {
 
     protected  void update(){
         //setup data
-        if(list == null){
-            ArrayList<Animal> animalList = new ArrayList<Animal>();
-            for(int i=0;i<animals.length;i++) {
-                String animal = animals[i].toLowerCase();
-                Animal a = new Animal();
-                a.imageId = getResources().getIdentifier(animal,"drawable",this.getPackageName());
-                a.soundId = getResources().getIdentifier(animal,"raw",this.getPackageName());
 
-                animalList.add(a);
-            }
-            list = animalList;
+        ArrayList<Animal> animalList = new ArrayList<Animal>();
+        for(int i=0;i<animals.length;i++) {
+            String animal = animals[i].toLowerCase();
+            Animal a = new Animal();
+            a.imageId = getResources().getIdentifier(animal,"drawable",this.getPackageName());
+            a.soundId = getResources().getIdentifier(animal,"raw",this.getPackageName());
+            animalList.add(a);
         }
+        list = animalList;
+        //list.add(newA);
+        ArrayList<Animal> locals = SQLiteDBHelper.getAll(this);
+        for(Animal a : locals){
+            list.add(a);
+        }
+
+
+
 
         //setup gridview
         final Context ctx = this;
@@ -102,7 +110,8 @@ public class SoundBoardActivity extends AppCompatActivity {
                 Animal newA = new Animal();
                 newA.imagePath = image;
                 newA.soundPath = sound;
-                list.add(newA);
+
+                SQLiteDBHelper.saveToDB(this,newA);
 
                 update();
                 Log.d(TAG, "onActivityResult: "+image);
