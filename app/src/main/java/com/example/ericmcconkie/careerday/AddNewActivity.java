@@ -40,7 +40,7 @@ public class AddNewActivity extends AppCompatActivity {
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
     private String timestamp = "";
-
+    private FloatingActionButton fabspeak;
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
@@ -96,7 +96,8 @@ public class AddNewActivity extends AppCompatActivity {
         }
 
 
-        FloatingActionButton fabspeak = (FloatingActionButton) findViewById(R.id.fab_speak);
+        fabspeak = (FloatingActionButton) findViewById(R.id.fab_speak);
+        fabspeak.setBackgroundTintList(getResources().getColorStateList(R.color.colorStopLightYellow,null));
         fabspeak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,14 +134,23 @@ public class AddNewActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        if(id == R.id.action_cancel){
+            cancelActivity();
+            return true;
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_save) {
             if(mFileName == null){
                 Toast.makeText(this,"Please add a voice sample",Toast.LENGTH_SHORT).show();
                 return false;
             }
+            if(imageView.getDrawable() == null){
+                cancelActivity();
+                return false;
+            }
+
             Bitmap bm=((BitmapDrawable)imageView.getDrawable()).getBitmap();
+
             String path = saveToInternalStorage(bm);
             if(path != null){
                 //save and finsih
@@ -162,6 +172,11 @@ public class AddNewActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void cancelActivity(){
+
+        finish();
     }
 
     //AUDIO PRIVATE METHODS
@@ -204,6 +219,7 @@ public class AddNewActivity extends AppCompatActivity {
         mRecorder.setOutputFile(mFileName);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
+        fabspeak.setBackgroundTintList(getResources().getColorStateList(R.color.colorStopLightGreen,null));
         try {
             mRecorder.prepare();
         } catch (IOException e) {
@@ -214,6 +230,7 @@ public class AddNewActivity extends AppCompatActivity {
     }
 
     private void stopRecording() {
+        fabspeak.setBackgroundTintList(getResources().getColorStateList(R.color.colorStopLightYellow,null));
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;

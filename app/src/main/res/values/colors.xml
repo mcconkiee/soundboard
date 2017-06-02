@@ -5,4 +5,8 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorCharcoal">#484848</color>
+
+    <color name="colorStopLightYellow">#f7c649</color>
+    <color name="colorStopLightGreen">#11a427</color>
+    <color name="colorStopLightRed">#a41111</color>
 </resources>

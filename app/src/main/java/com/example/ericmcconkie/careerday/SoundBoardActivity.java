@@ -33,6 +33,7 @@ public class SoundBoardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setTitle(getResources().getString(R.string.title_activity_sound_board));
         setContentView(R.layout.activity_sound_board);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -206,9 +207,9 @@ public class SoundBoardActivity extends AppCompatActivity {
 //                //save to local storage
 //                SQLiteDBHelper.saveToDB(this,newA);
 
-                //update ui
-                update();
             }
+            //update ui
+            update();
         }
     }
 }

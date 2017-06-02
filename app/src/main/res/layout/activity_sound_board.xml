@@ -13,7 +13,7 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            android:title="@string/app_name"
+            android:title="@string/title_activity_sound_board"
             android:textAlignment="center"
             android:titleTextColor="@android:color/white"
             android:layout_width="match_parent"
