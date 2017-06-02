@@ -20,9 +20,7 @@ import java.util.ArrayList;
 
 public class SoundBoardActivity extends AppCompatActivity {
     public static  int ADDCOMPLETE = 999;
-
     private static String TAG = "SoundBoardActivity";
-
     private String[] animals = {"cow","duck","horse","rooster","tiger","turkey"};
     ArrayList<Animal> list = null;
     @Override
@@ -31,8 +29,6 @@ public class SoundBoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sound_board);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
 
         FloatingActionButton actionButton = (FloatingActionButton)findViewById(R.id.fab);
         actionButton.setOnClickListener(new View.OnClickListener() {
@@ -47,7 +43,6 @@ public class SoundBoardActivity extends AppCompatActivity {
 
     protected  void update(){
         //setup data
-
         ArrayList<Animal> animalList = new ArrayList<Animal>();
         for(int i=0;i<animals.length;i++) {
             String animal = animals[i].toLowerCase();
@@ -57,14 +52,12 @@ public class SoundBoardActivity extends AppCompatActivity {
             animalList.add(a);
         }
         list = animalList;
-        //list.add(newA);
+
+        //add any stored from our local db gets added last
         ArrayList<Animal> locals = SQLiteDBHelper.getAll(this);
         for(Animal a : locals){
             list.add(a);
         }
-
-
-
 
         //setup gridview
         final Context ctx = this;
@@ -89,8 +82,6 @@ public class SoundBoardActivity extends AppCompatActivity {
                     mediaPlayer = MediaPlayer.create(ctx,animal.soundId);
                 }
                 mediaPlayer.start();
-
-
             }
         });
     }
@@ -106,15 +97,16 @@ public class SoundBoardActivity extends AppCompatActivity {
                 String image = data.getStringExtra("image");
                 String sound = data.getStringExtra("sound");
 
-
+                //create a new animal
                 Animal newA = new Animal();
                 newA.imagePath = image;
                 newA.soundPath = sound;
 
+                //save to local storage
                 SQLiteDBHelper.saveToDB(this,newA);
 
+                //update ui
                 update();
-                Log.d(TAG, "onActivityResult: "+image);
             }
         }
     }

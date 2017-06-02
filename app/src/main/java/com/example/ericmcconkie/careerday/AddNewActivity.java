@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -84,7 +85,14 @@ public class AddNewActivity extends AppCompatActivity {
         }
         mFileName = abs + timestamp + "_sound.3gp";
 
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        //check if we need permission to record
+        if(ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
+
 
         FloatingActionButton fabspeak = (FloatingActionButton) findViewById(R.id.fab_speak);
         fabspeak.setOnClickListener(new View.OnClickListener() {
@@ -143,7 +151,6 @@ public class AddNewActivity extends AppCompatActivity {
             }
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
