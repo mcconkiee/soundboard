@@ -9,6 +9,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -23,6 +27,8 @@ public class SoundBoardActivity extends AppCompatActivity {
     private static String TAG = "SoundBoardActivity";
     private String[] animals = {"cow","duck","horse","rooster","tiger","turkey"};
     ArrayList<Animal> list = null;
+    public boolean selectMode = false;
+    private ImageAdapter imageAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +68,9 @@ public class SoundBoardActivity extends AppCompatActivity {
         //setup gridview
         final Context ctx = this;
         GridView gridview = (GridView) findViewById(R.id.gridview);
-        ImageAdapter imageAdapter = new ImageAdapter(this,list);
+        gridview.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
+        gridview.setMultiChoiceModeListener(new MultiChoiceModeListener());
+        imageAdapter = new ImageAdapter(this,list);
         gridview.setAdapter(imageAdapter);
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -84,6 +92,62 @@ public class SoundBoardActivity extends AppCompatActivity {
                 mediaPlayer.start();
             }
         });
+    }
+    private void deleteSelectedItems(){
+        ArrayList<Animal> list = imageAdapter.selected;
+        for(Animal a : list){
+            int done = SQLiteDBHelper.removeFromDB(this,a);
+            boolean success = done > 0;
+            Log.d(TAG, "deleteSelectedItems: "+ done);
+        }
+        update();
+    }
+
+    public class MultiChoiceModeListener implements
+            GridView.MultiChoiceModeListener {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate the menu for the CAB
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.context, menu);
+            selectMode = true;
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            // Here you can perform updates to the CAB due to
+            // an invalidate() request
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            // Respond to clicks on the actions in the CAB
+            switch (item.getItemId()) {
+                case R.id.action_delete:
+                    deleteSelectedItems();
+                    selectMode = false;
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
+                default:
+                    return false;
+            }
+
+        }
+
+        @Override
+        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+            // Here you can do something when items are selected/de-selected,
+            // such as update the title in the CAB
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            // Here you can make any necessary updates to the activity when
+            // the CAB is removed. By default, selected items are deselected/unchecked.
+        }
     }
     @Override
     protected void onResume() {

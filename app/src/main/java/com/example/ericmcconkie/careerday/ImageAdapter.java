@@ -18,11 +18,11 @@ public class ImageAdapter extends BaseAdapter {
     private static String TAG = "ImageAdapter";
     private Context mContext;
     private ArrayList<Animal> mData;
-
+    public ArrayList<Animal> selected;
     public ImageAdapter(Context c, ArrayList<Animal> data) {
         mContext = c;
         mData = data;
-
+        selected = new ArrayList<Animal>();
     }
 
     public int getCount() {
@@ -42,11 +42,11 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+
+        final ImageView imageView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
-//            imageView.setLayoutParams(new GridView.LayoutParams(wt,ht));
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(8, 8, 8, 8);
@@ -54,14 +54,37 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        Animal animal = mData.get(position);
+        final Animal animal = mData.get(position);
+
         if(animal.imagePath != null){
             Uri uri = Uri.fromFile(new File(animal.imagePath));
+
             imageView.setImageURI(uri);
         }else{
             imageView.setImageResource(animal.imageId);
         }
+        if(mContext.getClass() == SoundBoardActivity.class){
+            SoundBoardActivity activity = (SoundBoardActivity)mContext;
+            final boolean contained = selected.contains(animal);
+            if(activity.selectMode){
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final boolean selectable = (animal.imagePath != null);
+                        if(selectable){
+                            if(contained){
+                                selected.remove(animal);
+                                imageView.setImageAlpha(255);
+                            }else{
+                                selected.add(animal);
+                                imageView.setImageAlpha(100);
+                            }
+                        }
+                    }
+                });
+            }
 
+        }
         return imageView;
     }
 

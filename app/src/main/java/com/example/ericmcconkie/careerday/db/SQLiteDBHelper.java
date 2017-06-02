@@ -17,6 +17,7 @@ import java.util.ArrayList;
  */
 
 public class SQLiteDBHelper extends SQLiteOpenHelper{
+    private  static String TAG = "SQLiteDBHelper";
     private static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "soundboard_animals";
     public static final String ANIMAL_TABLE_NAME = "animals";
@@ -43,6 +44,17 @@ public class SQLiteDBHelper extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
+    public static int removeFromDB(Context ctx, Animal animal) {
+        SQLiteDatabase database = new SQLiteDBHelper(ctx).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteDBHelper.ANIMAL_IMAGE, animal.imagePath);
+        values.put(SQLiteDBHelper.ANIMAL_SOUND, animal.soundPath);
+
+        String query = ANIMAL_ID + "=" + Integer.toString(animal.animalId);
+        Log.d(TAG, "removeFromDB: "+ query);
+        return database.delete(ANIMAL_TABLE_NAME, query, null) ;
+    }
+
     public static  long saveToDB(Context ctx, Animal animal) {
         SQLiteDatabase database = new SQLiteDBHelper(ctx).getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -52,6 +64,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper{
 
         return newRowId;
     }
+
     public static ArrayList<Animal> getAll(Context ctx) {
         SQLiteDatabase database = new SQLiteDBHelper(ctx).getReadableDatabase();
 
