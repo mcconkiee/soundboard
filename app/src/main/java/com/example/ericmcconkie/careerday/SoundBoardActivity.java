@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -93,6 +94,26 @@ public class SoundBoardActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void smsSelectedItems(){
+        ArrayList<Animal> list = imageAdapter.selected;
+        if(list.size() >=1 ){
+            Animal animal = list.get(0);
+            try {
+                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+//            sendIntent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity");
+                sendIntent.putExtra("sms_body", "some text");
+                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + animal.imagePath));
+                sendIntent.setType("image/jpeg");
+                startActivity(sendIntent);;
+            }catch (Exception e){
+                Log.d(TAG, "smsSelectedItems: error"+ e);
+            }
+
+        }/**/
+        update();
+    }
+
     private void deleteSelectedItems(){
         ArrayList<Animal> list = imageAdapter.selected;
         for(Animal a : list){
@@ -126,6 +147,11 @@ public class SoundBoardActivity extends AppCompatActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             // Respond to clicks on the actions in the CAB
             switch (item.getItemId()) {
+                case R.id.action_sms:
+                    smsSelectedItems();
+                    selectMode = false;
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
                 case R.id.action_delete:
                     deleteSelectedItems();
                     selectMode = false;
