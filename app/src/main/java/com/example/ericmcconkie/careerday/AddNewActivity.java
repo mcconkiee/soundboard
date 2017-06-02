@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.ericmcconkie.careerday.db.SQLiteDBHelper;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -142,6 +144,14 @@ public class AddNewActivity extends AppCompatActivity {
             String path = saveToInternalStorage(bm);
             if(path != null){
                 //save and finsih
+                //create a new animal
+                Animal newA = new Animal();
+                newA.imagePath = path;
+                newA.soundPath = mFileName;
+
+                //save to local storage
+                SQLiteDBHelper.saveToDB(this,newA);
+
                 //add data to the activity that called this..
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("image",path);

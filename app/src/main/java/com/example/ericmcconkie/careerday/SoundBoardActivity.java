@@ -100,12 +100,23 @@ public class SoundBoardActivity extends AppCompatActivity {
         if(list.size() >=1 ){
             Animal animal = list.get(0);
             try {
-                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                Intent sendIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 //            sendIntent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity");
-                sendIntent.putExtra("sms_body", "some text");
-                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + animal.imagePath));
-                sendIntent.setType("image/jpeg");
-                startActivity(sendIntent);;
+
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+                uris.add(Uri.parse("file:///" + animal.imagePath));
+                uris.add(Uri.parse("file:///" + animal.soundPath));
+                sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                sendIntent.setType("*/*");
+
+//                sendIntent.putExtra("sms_body", "Crazy Animals...");
+//                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + animal.imagePath));
+//                sendIntent.setType("image/jpeg");
+//
+//                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///" + animal.soundPath));
+//                sendIntent.setType("image/3gp");
+
+                startActivity(Intent.createChooser(sendIntent,"Send Items"));
             }catch (Exception e){
                 Log.d(TAG, "smsSelectedItems: error"+ e);
             }
@@ -184,16 +195,16 @@ public class SoundBoardActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == ADDCOMPLETE){
             if (resultCode == Activity.RESULT_OK) {
-                String image = data.getStringExtra("image");
-                String sound = data.getStringExtra("sound");
-
-                //create a new animal
-                Animal newA = new Animal();
-                newA.imagePath = image;
-                newA.soundPath = sound;
-
-                //save to local storage
-                SQLiteDBHelper.saveToDB(this,newA);
+//                String image = data.getStringExtra("image");
+//                String sound = data.getStringExtra("sound");
+//
+//                //create a new animal
+//                Animal newA = new Animal();
+//                newA.imagePath = image;
+//                newA.soundPath = sound;
+//
+//                //save to local storage
+//                SQLiteDBHelper.saveToDB(this,newA);
 
                 //update ui
                 update();
